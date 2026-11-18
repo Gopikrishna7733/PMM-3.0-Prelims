@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10233f">
+  <meta name="description" content="A secure, mobile-first exam portal">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  <title>PMM 3.0 — Exam Portal</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="PMM 3.0 home"><img class="brand-mark" src="./assets/pmm-3-logo.png" alt="PMM 3.0"></a>
+    <button class="button button-quiet" id="admin-toggle" type="button">Admin</button>
+  </header>
+
+  <main id="app" class="page-shell">
+    <section id="login-view" class="panel entry-panel">
+      <p class="eyebrow">ONLINE ASSESSMENT</p>
+      <h1>Ready when you are.</h1>
+      <p class="muted">Enter the exam code and your roll number to continue.</p>
+      <form id="entry-form" class="form-stack">
+        <label>Exam code<input id="exam-code" name="examCode" required autocomplete="off" autocapitalize="characters" placeholder="e.g. BIO-101"></label>
+        <label>Pharmacy batch<input id="student-batch" name="batch" required autocomplete="off" placeholder="e.g. 2024–2028"></label>
+        <label>Roll number<input id="roll-number" name="rollNumber" required autocomplete="off" placeholder="Your roll number"></label>
+        <button class="button button-primary button-wide" type="submit">Continue</button>
+      </form>
+      <p class="fine-print">Your answers are saved on this device and synced periodically.</p>
+    </section>
+
+    <section id="instructions-view" class="panel hidden">
+      <p class="eyebrow">BEFORE YOU BEGIN</p>
+      <h1 id="instructions-title">Exam instructions</h1>
+      <div id="instructions-content" class="instructions-copy"></div>
+      <div class="notice">Keep this page open and stay in fullscreen where supported. Leaving the exam page may be recorded as a violation.</div>
+      <button id="start-exam" class="button button-primary button-wide" type="button">Start Exam</button>
+    </section>
+
+    <section id="exam-view" class="exam-layout hidden" aria-label="Exam">
+      <div class="exam-main">
+        <div class="exam-heading">
+          <div><p class="eyebrow" id="exam-code-label"></p><h1 id="exam-title"></h1></div>
+          <div class="timer-box"><span class="timer-label">TIME LEFT</span><strong id="timer" role="timer">--:--</strong></div>
+        </div>
+        <div class="progress-row"><span id="question-count"></span><span id="save-status" aria-live="polite">Saved on this device</span></div>
+        <article class="question-card">
+          <div class="question-topline"><span id="question-number"></span><button id="review-button" class="button button-outline" type="button">☆ Mark for review</button></div>
+          <h2 id="question-text"></h2>
+          <div id="options-list" class="options-list"></div>
+        </article>
+        <div class="exam-controls">
+          <button id="previous-question" class="button button-outline" type="button">Previous</button>
+          <button id="next-question" class="button button-primary" type="button">Next</button>
+        </div>
+      </div>
+      <aside class="navigator-panel" id="navigator-panel">
+        <div class="navigator-heading"><h2>Questions</h2><button id="navigator-toggle" class="button button-quiet mobile-only" type="button" aria-expanded="true">Hide</button></div>
+        <p class="navigator-legend"><span class="legend-dot answered-dot"></span> Answered <span class="legend-dot review-dot"></span> Review</p>
+        <div id="question-navigator" class="question-navigator"></div>
+        <div class="navigator-summary" id="navigator-summary"></div>
+        <button id="submit-exam" class="button button-danger button-wide" type="button">Submit exam</button>
+      </aside>
+    </section>
+
+    <section id="complete-view" class="panel completion-panel hidden">
+      <div class="completion-icon" aria-hidden="true">✓</div>
+      <p class="eyebrow">EXAM COMPLETE</p>
+      <h1 id="complete-title">Your exam has been submitted</h1>
+      <p class="muted" id="complete-message">Your responses have been saved. You may close this page.</p>
+    </section>
+
+    <section id="admin-view" class="hidden"></section>
+  </main>
+
+  <div id="blocking-overlay" class="overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="violation-title">
+    <div class="overlay-card">
+      <p class="eyebrow">EXAM PAUSED</p><h2 id="violation-title">Please return to your exam</h2>
+      <p id="violation-message">This event was recorded. Your exam is paused until you confirm.</p>
+      <button id="resume-exam" class="button button-primary button-wide" type="button">I’m back — resume</button>
+    </div>
+  </div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

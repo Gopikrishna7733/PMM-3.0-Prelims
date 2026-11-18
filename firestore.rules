@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function examPath(examId) {
+      return /databases/$(database)/documents/exams/$(examId);
+    }
+
+    function validAttemptCreate(examId, attemptId) {
+      let data = request.resource.data;
+      return signedIn() &&
+        attemptId == data.rollNumber &&
+        data.uid == request.auth.uid &&
+        data.keys().hasAll([
+          'uid', 'rollNumber', 'batch', 'sessionId', 'status', 'answers', 'reviewed',
+          'questionOrder', 'optionOrders', 'violations', 'violationCount',
+          'durationSeconds', 'startedAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'rollNumber', 'batch', 'sessionId', 'status', 'answers', 'reviewed',
+          'questionOrder', 'optionOrders', 'violations', 'violationCount',
+          'durationSeconds', 'startedAt', 'updatedAt'
+        ]) &&
+        data.rollNumber is string &&
+        data.rollNumber.matches('^[A-Z0-9_-]{1,40}$') &&
+        data.batch is string &&
+        data.batch.size() > 0 &&
+        data.batch.size() <= 40 &&
+        data.status == 'in_progress' &&
+        data.answers is map &&
+        data.reviewed is list &&
+        data.questionOrder is list &&
+        data.optionOrders is map &&
+        data.violations is list &&
+        data.violations.size() == 0 &&
+        data.violationCount == 0 &&
+        data.durationSeconds is int &&
+        data.durationSeconds > 0 &&
+        data.durationSeconds <= 86400 &&
+        data.startedAt == request.time &&
+        data.updatedAt == request.time &&
+        get(examPath(examId)).data.published == true;
+    }
+
+    function validAttemptUpdate(examId) {
+      let data = request.resource.data;
+      return signedIn() &&
+        resource.data.uid == request.auth.uid &&
+        data.sessionId is string &&
+        resource.data.status == 'in_progress' &&
+        data.uid == resource.data.uid &&
+        data.rollNumber == resource.data.rollNumber &&
+        data.batch == resource.data.batch &&
+        data.sessionId == resource.data.sessionId &&
+        data.durationSeconds == resource.data.durationSeconds &&
+        data.startedAt == resource.data.startedAt &&
+        data.questionOrder == resource.data.questionOrder &&
+        data.optionOrders == resource.data.optionOrders &&
+        data.keys().hasOnly([
+          'uid', 'rollNumber', 'batch', 'sessionId', 'status', 'answers', 'reviewed',
+          'questionOrder', 'optionOrders', 'violations', 'violationCount',
+          'durationSeconds', 'startedAt', 'updatedAt', 'submittedAt',
+          'submitReason'
+        ]) &&
+        data.status in ['in_progress', 'submitted'] &&
+        data.answers is map &&
+        data.reviewed is list &&
+        data.violations is list &&
+        data.violationCount == data.violations.size() &&
+        data.violationCount <= get(examPath(examId)).data.maxViolations &&
+        data.updatedAt == request.time &&
+        (data.status != 'submitted' ||
+          (data.submittedAt == request.time && data.submitReason is string));
+    }
+
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    match /exams/{examId} {
+      allow get: if signedIn() && (isAdmin() || resource.data.published == true);
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+
+      match /private/{documentId} {
+        allow read, write: if isAdmin();
+      }
+
+      match /attempts/{attemptId} {
+        allow get: if isAdmin() ||
+          (signedIn() &&
+            (!exists(/databases/$(database)/documents/exams/$(examId)/attempts/$(attemptId)) ||
+              resource.data.uid == request.auth.uid));
+        allow list: if isAdmin();
+        allow create: if validAttemptCreate(examId, attemptId);
+        allow update: if validAttemptUpdate(examId);
+        allow delete: if false;
+      }
+    }
+  }
+}
