@@ -13,7 +13,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const state = {
-  user: null, exam: null, examId: "", attemptId: "", attemptRef: null,
+  user: null, authError: null, exam: null, examId: "", attemptId: "", attemptRef: null,
   attempt: null, sessionId: "", answers: {}, reviewed: new Set(), questionOrder: [],
   optionOrders: {}, current: 0, deadline: 0, timerHandle: 0,
   syncHandle: 0, submitRetryHandle: 0, submitRetrying: false, dirty: false, violationBusy: false, lastViolationAt: 0,
@@ -975,7 +975,24 @@ function exportResults() {
 async function openAdmin() {
   showView("admin-view");
   if (!state.user) {
-    notify("Wait for Firebase sign-in to finish, then open Admin again.");
+    const root = $("#admin-view");
+    root.replaceChildren();
+    const section = document.createElement("section");
+    section.className = "admin-section";
+    const title = document.createElement("h1");
+    title.textContent = "Admin dashboard";
+    const message = document.createElement("p");
+    message.className = "muted";
+    message.textContent = state.authError
+      ? "Firebase sign-in is unavailable. Enable Anonymous Authentication in Firebase Console and verify the web app configuration, then reload."
+      : "Waiting for Firebase anonymous sign-in to finish…";
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "button button-outline";
+    back.textContent = "Back to student portal";
+    back.addEventListener("click", () => showView("login-view"));
+    section.append(title, message, back);
+    root.append(section);
     return;
   }
   try {
@@ -1000,6 +1017,7 @@ async function initialize() {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       state.user = user;
+      state.authError = null;
       return;
     }
     try {
@@ -1007,6 +1025,7 @@ async function initialize() {
       state.user = credential.user;
     } catch (error) {
       console.error("Anonymous sign-in failed.", error);
+      state.authError = error;
       notify("Firebase sign-in failed. Check your Firebase configuration and enable Anonymous Authentication.", 10000);
     }
   });
