@@ -7,7 +7,7 @@ import {
 } from "firebase/firestore";
 
 const $ = (selector) => document.querySelector(selector);
-const views = ["login-view", "instructions-view", "exam-view", "complete-view", "admin-view"];
+const views = ["login-view", "dashboard-view", "instructions-view", "exam-view", "complete-view", "admin-view"];
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -205,6 +205,39 @@ function showInstructions() {
   showView("instructions-view");
 }
 
+function renderStudentDashboard() {
+  const roll = state.attempt.rollNumber;
+  const batch = state.attempt.batch;
+  const exam = state.exam;
+  const initial = roll.charAt(0).toUpperCase();
+  const duration = `${exam.durationMinutes} minutes`;
+  const questions = String(exam.questions.length);
+
+  $("#dashboard-greeting").textContent = `Welcome back, ${roll}`;
+  $("#dashboard-subtitle").textContent = `Your Pharmacy assessment for batch ${batch} is ready.`;
+  $("#dashboard-batch-pill").textContent = `Pharmacy · Batch ${batch}`;
+  $("#sidebar-roll").textContent = roll;
+  $("#sidebar-avatar").textContent = initial;
+  $("#sidebar-batch").textContent = `Batch ${batch}`;
+  $("#overview-batch").textContent = batch;
+  $("#overview-duration").textContent = duration;
+  $("#overview-question-count").textContent = questions;
+  $("#dashboard-exam-code").textContent = state.examId;
+  $("#dashboard-exam-title").textContent = exam.title;
+  $("#preview-question-count").textContent = questions;
+  $("#preview-duration").textContent = duration;
+  $("#dashboard-exam-status").textContent = state.attempt.status === "in_progress" ? "In progress" : "Ready to start";
+  $("#exam-detail-code").textContent = state.examId;
+  $("#exam-detail-title").textContent = exam.title;
+  $("#exam-detail-questions").textContent = questions;
+  $("#exam-detail-duration").textContent = `${exam.durationMinutes} min`;
+  $("#profile-avatar").textContent = initial;
+  $("#profile-roll").textContent = roll;
+  $("#profile-batch").textContent = batch;
+  $("#profile-exam-code").textContent = state.examId;
+  showView("dashboard-view");
+}
+
 function parseDate(value) {
   if (!value) return null;
   const millis = Date.parse(value);
@@ -279,7 +312,7 @@ async function enterExam(event) {
       state.attempt = { rollNumber: rollNumber.toUpperCase(), batch, violations: [], status: "new" };
     }
     ensureOrder();
-    showInstructions();
+    renderStudentDashboard();
   } catch (error) {
     console.error("Could not open exam.", error);
     notify(error.message || "Could not open the exam. Check your connection and try again.");
@@ -544,6 +577,24 @@ function goToQuestion(index) {
 
 function installStudentHandlers() {
   $("#entry-form").addEventListener("submit", enterExam);
+  for (const button of document.querySelectorAll("[data-dashboard-tab]")) {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.dashboardTab;
+      for (const panel of document.querySelectorAll(".student-tab-panel")) {
+        panel.classList.toggle("hidden", panel.id !== `dashboard-tab-${tab}`);
+      }
+      for (const navButton of document.querySelectorAll(".student-nav-button")) {
+        const active = navButton.dataset.dashboardTab === tab;
+        navButton.classList.toggle("active", active);
+        if (active) navButton.setAttribute("aria-current", "page");
+        else navButton.removeAttribute("aria-current");
+      }
+    });
+  }
+  for (const button of document.querySelectorAll(".continue-to-instructions")) {
+    button.addEventListener("click", showInstructions);
+  }
+  $("#instructions-back").addEventListener("click", () => showView("dashboard-view"));
   $("#start-exam").addEventListener("click", startAttempt);
   $("#previous-question").addEventListener("click", () => goToQuestion(state.current - 1));
   $("#next-question").addEventListener("click", () => {

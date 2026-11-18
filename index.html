@@ -15,17 +15,105 @@
   </header>
 
   <main id="app" class="page-shell">
-    <section id="login-view" class="panel entry-panel">
-      <p class="eyebrow">ONLINE ASSESSMENT</p>
-      <h1>Ready when you are.</h1>
-      <p class="muted">Enter the exam code and your roll number to continue.</p>
-      <form id="entry-form" class="form-stack">
-        <label>Exam code<input id="exam-code" name="examCode" required autocomplete="off" autocapitalize="characters" placeholder="e.g. BIO-101"></label>
-        <label>Pharmacy batch<input id="student-batch" name="batch" required autocomplete="off" placeholder="e.g. 2024–2028"></label>
-        <label>Roll number<input id="roll-number" name="rollNumber" required autocomplete="off" placeholder="Your roll number"></label>
-        <button class="button button-primary button-wide" type="submit">Continue</button>
-      </form>
-      <p class="fine-print">Your answers are saved on this device and synced periodically.</p>
+    <section id="login-view" class="welcome-layout">
+      <div class="welcome-copy">
+        <p class="eyebrow">PHARMACY LEARNING · PMM 3.0</p>
+        <h1>Prepare with purpose. Progress with confidence.</h1>
+        <p class="welcome-lede">Your exam workspace for Pharmacy studies, built to keep your next assessment clear, focused, and within reach.</p>
+        <div class="welcome-highlights">
+          <div><span class="highlight-check">✓</span><span>One focused place for your assessments</span></div>
+          <div><span class="highlight-check">✓</span><span>Your progress is saved as you work</span></div>
+        </div>
+      </div>
+      <div class="panel entry-panel">
+        <div class="entry-card-heading">
+          <span class="entry-step">STUDENT ACCESS</span>
+          <h2>Go to your exam</h2>
+          <p class="muted">Enter your Pharmacy batch, roll number, and exam code.</p>
+        </div>
+        <form id="entry-form" class="form-stack">
+          <label>Exam code<input id="exam-code" name="examCode" required autocomplete="off" autocapitalize="characters" placeholder="e.g. PHARM-101"></label>
+          <label>Pharmacy batch<input id="student-batch" name="batch" required autocomplete="off" placeholder="e.g. 2024–2028"></label>
+          <label>Roll number<input id="roll-number" name="rollNumber" required autocomplete="off" placeholder="Your roll number"></label>
+          <button class="button button-primary button-wide" type="submit">Continue to dashboard <span aria-hidden="true">→</span></button>
+        </form>
+        <p class="fine-print">Your answers are stored on this device and synced periodically during the exam.</p>
+      </div>
+    </section>
+
+    <section id="dashboard-view" class="dashboard-view hidden">
+      <aside class="student-sidebar">
+        <div class="student-sidebar-identity">
+          <div class="student-avatar" id="sidebar-avatar">P</div>
+          <div><strong id="sidebar-roll">Student</strong><span>Pharmacy student</span></div>
+        </div>
+        <p class="sidebar-section-label">STUDENT SPACE</p>
+        <nav class="student-nav" aria-label="Student dashboard">
+          <button class="student-nav-button active" type="button" data-dashboard-tab="overview" aria-current="page"><span class="nav-symbol" aria-hidden="true">⌂</span>Overview</button>
+          <button class="student-nav-button" type="button" data-dashboard-tab="exams"><span class="nav-symbol" aria-hidden="true">▤</span>My exam</button>
+          <button class="student-nav-button" type="button" data-dashboard-tab="profile"><span class="nav-symbol" aria-hidden="true">◉</span>Profile</button>
+        </nav>
+        <div class="sidebar-course">
+          <p class="sidebar-section-label">YOUR PROGRAM</p>
+          <div class="course-mini-card">
+            <span class="course-mini-icon">Rx</span>
+            <span><strong>Pharmacy</strong><small id="sidebar-batch">Batch</small></span>
+          </div>
+        </div>
+      </aside>
+
+      <div class="dashboard-main">
+        <header class="dashboard-header">
+          <div>
+            <p class="eyebrow">STUDENT DASHBOARD</p>
+            <h1 id="dashboard-greeting">Welcome back</h1>
+            <p class="muted" id="dashboard-subtitle">Your learning space is ready.</p>
+          </div>
+          <span class="batch-pill" id="dashboard-batch-pill">Pharmacy · Batch</span>
+        </header>
+
+        <section id="dashboard-tab-overview" class="student-tab-panel">
+          <div class="dashboard-hero">
+            <div class="hero-copy">
+              <span class="hero-kicker">YOUR NEXT STEP</span>
+              <h2>Make this assessment count.</h2>
+              <p>Your exam is ready when you are. Review the details before you begin.</p>
+              <button class="button button-light continue-to-instructions" type="button">View exam instructions <span aria-hidden="true">→</span></button>
+            </div>
+            <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-book">Rx</div></div>
+          </div>
+          <div class="dashboard-stat-grid">
+            <article class="dashboard-stat"><span class="stat-icon batch-icon">B</span><div><span class="stat-label">MY BATCH</span><strong id="overview-batch">—</strong></div></article>
+            <article class="dashboard-stat"><span class="stat-icon duration-icon">T</span><div><span class="stat-label">EXAM DURATION</span><strong id="overview-duration">—</strong></div></article>
+            <article class="dashboard-stat"><span class="stat-icon question-icon">Q</span><div><span class="stat-label">QUESTIONS</span><strong id="overview-question-count">—</strong></div></article>
+          </div>
+          <div class="dashboard-section-heading"><div><p class="eyebrow">CONTINUE LEARNING</p><h2>Your assessment</h2></div><button class="text-button" type="button" data-dashboard-tab="exams">View details <span aria-hidden="true">→</span></button></div>
+          <article class="exam-preview-card">
+            <div class="exam-subject-icon">Rx</div>
+            <div class="exam-preview-copy"><span class="exam-code-chip" id="dashboard-exam-code">EXAM</span><h3 id="dashboard-exam-title">Your exam</h3><p class="muted"><span id="preview-question-count">0</span> questions <span aria-hidden="true">·</span> <span id="preview-duration">0 minutes</span></p></div>
+            <button class="button button-primary continue-to-instructions" type="button">Continue <span aria-hidden="true">→</span></button>
+          </article>
+        </section>
+
+        <section id="dashboard-tab-exams" class="student-tab-panel hidden">
+          <div class="dashboard-section-heading"><div><p class="eyebrow">ASSESSMENTS</p><h2>My exam</h2></div><span class="exam-status-pill" id="dashboard-exam-status">Ready</span></div>
+          <article class="dashboard-content-card exam-detail-card">
+            <div class="exam-detail-top"><div class="exam-subject-icon">Rx</div><div><span class="exam-code-chip" id="exam-detail-code">EXAM</span><h2 id="exam-detail-title">Your exam</h2></div></div>
+            <p class="muted">Take your time, read each question carefully, and use the question navigator to review your answers.</p>
+            <div class="exam-detail-meta"><span><strong id="exam-detail-questions">0</strong> questions</span><span><strong id="exam-detail-duration">0 min</strong> duration</span></div>
+            <button class="button button-primary continue-to-instructions" type="button">Review instructions <span aria-hidden="true">→</span></button>
+          </article>
+        </section>
+
+        <section id="dashboard-tab-profile" class="student-tab-panel hidden">
+          <div class="dashboard-section-heading"><div><p class="eyebrow">STUDENT DETAILS</p><h2>My profile</h2></div></div>
+          <article class="dashboard-content-card profile-card">
+            <div class="profile-avatar" id="profile-avatar">P</div>
+            <div><p class="eyebrow">PHARMACY STUDENT</p><h2 id="profile-roll">—</h2><p class="muted">Your assessment details are kept with your exam attempt.</p></div>
+            <dl class="profile-details"><div><dt>Batch</dt><dd id="profile-batch">—</dd></div><div><dt>Exam code</dt><dd id="profile-exam-code">—</dd></div></dl>
+          </article>
+        </section>
+      </div>
     </section>
 
     <section id="instructions-view" class="panel hidden">
@@ -33,6 +121,7 @@
       <h1 id="instructions-title">Exam instructions</h1>
       <div id="instructions-content" class="instructions-copy"></div>
       <div class="notice">Keep this page open and stay in fullscreen where supported. Leaving the exam page may be recorded as a violation.</div>
+      <button id="instructions-back" class="button button-outline button-wide" type="button">Back to dashboard</button>
       <button id="start-exam" class="button button-primary button-wide" type="button">Start Exam</button>
     </section>
 
