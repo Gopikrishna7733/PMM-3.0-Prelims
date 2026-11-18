@@ -1,6 +1,6 @@
-const CACHE_NAME = "pmm-exam-shell-v1";
+const CACHE_NAME = "pmm-exam-shell-v2";
 const APP_SHELL = [
-  "./", "./index.html", "./styles.css", "./app.js", "./firebase-config.js", "./manifest.json",
+  "./", "./index.html", "./admin.html", "./manifest.json",
   "./assets/pmm-3-logo.png", "./assets/pmm-icon-192.png", "./assets/pmm-icon-512.png"
 ];
 

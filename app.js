@@ -1,10 +1,10 @@
 import { firebaseConfig, useEmulators } from "./firebase-config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { connectAuthEmulator, getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { initializeApp } from "firebase/app";
+import { connectAuthEmulator, getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import {
   collection, connectFirestoreEmulator, doc, getDoc, getFirestore, onSnapshot, runTransaction,
   serverTimestamp, updateDoc, writeBatch
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+} from "firebase/firestore";
 
 const $ = (selector) => document.querySelector(selector);
 const views = ["login-view", "instructions-view", "exam-view", "complete-view", "admin-view"];
@@ -21,7 +21,10 @@ const state = {
 };
 
 function showView(id) {
-  for (const view of views) $(`#${view}`).classList.toggle("hidden", view !== id);
+  for (const view of views) {
+    const element = $(`#${view}`);
+    if (element) element.classList.toggle("hidden", view !== id);
+  }
 }
 
 function notify(message, duration = 4200) {
@@ -653,7 +656,7 @@ function adminShell(isAdmin) {
   header.className = "admin-section";
   header.innerHTML = `<div class="admin-toolbar"><div><p class="eyebrow">ADMINISTRATION</p><h1>Exam dashboard</h1></div><button id="back-to-student" class="button button-outline" type="button">Student portal</button></div><p id="admin-identity" class="muted"></p>`;
   root.append(header);
-  $("#back-to-student").addEventListener("click", () => showView("login-view"));
+  $("#back-to-student").addEventListener("click", () => { window.location.href = "./index.html"; });
   $("#admin-identity").textContent = `Signed in UID: ${state.user.uid}`;
   if (!isAdmin) {
     const denied = document.createElement("section");
@@ -990,7 +993,7 @@ async function openAdmin() {
     back.type = "button";
     back.className = "button button-outline";
     back.textContent = "Back to student portal";
-    back.addEventListener("click", () => showView("login-view"));
+    back.addEventListener("click", () => { window.location.href = "./index.html"; });
     section.append(title, message, back);
     root.append(section);
     return;
@@ -1005,8 +1008,9 @@ async function openAdmin() {
 }
 
 async function initialize() {
-  installStudentHandlers();
-  $("#admin-toggle").addEventListener("click", openAdmin);
+  const adminPage = document.body.dataset.page === "admin";
+  if (!adminPage) installStudentHandlers();
+  else openAdmin();
   if (useEmulators) {
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
@@ -1018,6 +1022,7 @@ async function initialize() {
     if (user) {
       state.user = user;
       state.authError = null;
+      if (adminPage) openAdmin();
       return;
     }
     try {
@@ -1027,6 +1032,7 @@ async function initialize() {
       console.error("Anonymous sign-in failed.", error);
       state.authError = error;
       notify("Firebase sign-in failed. Check your Firebase configuration and enable Anonymous Authentication.", 10000);
+      if (adminPage) openAdmin();
     }
   });
   if ("serviceWorker" in navigator) {

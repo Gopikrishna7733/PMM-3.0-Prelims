@@ -1,6 +1,6 @@
 # PMM 3.0 Exam Portal
 
-A mobile-first static exam app using Firebase Anonymous Authentication and Cloud Firestore. The student app reads one published exam document (all questions and options together), stores answers locally, and syncs changes periodically and on violations/submission. Correct options are written separately to an admin-only answer-key document.
+A mobile-first exam app built with vanilla JavaScript, Vite, Firebase Authentication, and Cloud Firestore. Students use `index.html`; administrators use the separate `admin.html` interface. The student app reads one published exam document (all questions and options together), stores answers locally, and syncs changes periodically and on violations/submission. Correct options are written separately to an admin-only answer-key document.
 
 ## Files and data model
 
@@ -19,8 +19,8 @@ All questions are kept in the exam document to avoid one read per question. Fire
 4. Copy `firebase-config.example.js` to `firebase-config.js` (or edit the provided `firebase-config.js`) and fill in the Firebase Web app config. Firebase web config is public; do not put service-account keys in the browser.
 5. In **Firestore → Rules**, publish `firestore.rules`.
 6. To grant admin access: open the app once, sign in anonymously, and read the UID in the browser's Firebase Authentication users list (or inspect the signed-in user in dev tools). In the Firestore console, create `admins/{that UID}` with any non-sensitive field, for example `{ "role": "admin" }`. Do this only for trusted admins.
-7. Serve the folder over HTTPS or localhost (service workers and the Fullscreen API require a secure context). For example, use the Firebase Hosting emulator or `python -m http.server 8000`.
-8. Open Admin, create an exam, set the opening/closing window and violation limit, add four-option MCQs with their answer, and save. The public exam and private key are saved as separate documents.
+7. Run `npm install`, then `npm run dev`. The student portal is at `/`; the admin portal is at `/admin.html`. Hosting must use HTTPS or localhost for service workers and the Fullscreen API.
+8. Open `/admin.html`, sign in anonymously, and create an exam with its opening/closing window, violation limit, and four-option MCQs. The public exam and private key are saved as separate documents.
 
 Students enter their Pharmacy batch (for example, `2024–2028`) with their exam code and roll number. Batch is stored with the attempt, shown in the admin dashboard, and included in CSV exports. The exam code and roll number are case-insensitive; roll numbers are normalized to uppercase and may contain letters, numbers, `_`, and `-` (maximum 40 characters). The roll number is the attempt document ID, visible to admins only; students cannot list attempts.
 
@@ -40,7 +40,7 @@ Before a real exam, enable **Google Cloud Billing budget alerts** (for example, 
 
 ## Load test (local emulators only)
 
-Start the Firebase Emulator Suite with Authentication on port 9099 and Firestore on 8080, deploy the rules to the Firestore emulator, and set `useEmulators = true` in `firebase-config.js`. Create a published exam in the emulator (use the app's Admin screen after adding the emulator Auth UID under `admins/{UID}` in the emulator Firestore UI). Then run:
+Start the Firebase Emulator Suite with Authentication on port 9099 and Firestore on 8080, deploy the rules to the Firestore emulator, set `useEmulators = true` in `firebase-config.js`, and run `npm run dev`. Create a published exam in the emulator (use `/admin.html` after adding the emulator Auth UID under `admins/{UID}` in the emulator Firestore UI). Then run:
 
 ```powershell
 $env:FIREBASE_PROJECT_ID = "your-emulator-project-id"
@@ -54,16 +54,15 @@ By default, the script refuses non-local emulator endpoints and creates 500 anon
 
 ### GitHub Pages
 
-1. Put the static files in a GitHub repository and ensure `firebase-config.js` contains the project's public web config.
-2. In repository **Settings → Pages**, deploy from the branch/root (or configure a workflow to publish the static files).
+1. Ensure `firebase-config.js` contains the project's public web config.
+2. Run `npm run build` and publish the contents of `dist/` using GitHub Pages (for example, with a Pages workflow that uploads `dist/`).
 3. Add the deployed Pages origin to Firebase **Authentication → Settings → Authorized domains**.
 4. Publish Firestore rules separately in the Firebase console. GitHub Pages does not deploy Firestore rules.
 
 ### Firebase Hosting
 
-1. Install Firebase CLI and run `firebase login`, then `firebase init hosting` in this folder.
-2. Select the Firebase project, use the current folder as the public directory, and configure it as a single-page app if prompted.
-3. Ensure `firebase.json` deploys `firestore.rules` using `"firestore": { "rules": "firestore.rules" }`.
-4. Run `firebase deploy --only hosting,firestore:rules`.
+1. Install Firebase CLI and run `firebase login`, then select this project's Firebase project.
+2. Run `npm run build`; `firebase.json` is configured to host `dist/` and publish `firestore.rules`.
+3. Run `firebase deploy --only hosting,firestore:rules`.
 
 The included service worker caches the local app shell and PMM 3.0 install icons for returning visits. Firebase SDK modules and Firestore data still require network access; an in-progress exam can continue locally and sync when connectivity returns.

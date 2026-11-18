@@ -1,6 +1,6 @@
 {
-  "name": "Exam Portal",
-  "short_name": "Exam Portal",
+  "name": "PMM 3.0 Exam Portal",
+  "short_name": "PMM 3.0",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
